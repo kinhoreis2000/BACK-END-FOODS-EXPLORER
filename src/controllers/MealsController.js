@@ -6,46 +6,50 @@ const sqlConnection = require('../database/sqlite')
 
 class MealsController {
   async index(req,res) {
-  const { title, ingredients } = req.query
+  const { search, category } = req.query
   const user_id = req.user.id
   let meals
-  if (ingredients) {
-    const filterIngredients = ingredients.split(',').map(ingredient => ingredient.trim())
 
-    meals =  await knex('meals')
-  .select([
-    'meals.id',
-    'meals.title',
-    'meals.user_id',
-  ])
-  .where('meals.user_id', Number(user_id) )
-  .whereLike('meals.title', `%${title}%` )
-  .whereIn('meals.id', function() {
-    this.select('meal_id')
-        .from('ingredients')
-        .whereIn('name', filterIngredients)
-        .groupBy('meal_id')
-  })
-  .orderBy('meals.title')
 
-  } else {
+  if (search) {
+    console.log(search)
+
+     meals = await knex('meals')
+    .select('meals.title', 'meals.image', 'meals.description', 'meals.category', 'meals.price', 'ingredients.name as ingredientes')
+    .join('ingredients', 'ingredients.meal_id', '=', 'meals.id')
+    .where('meals.user_id', user_id)
+    .andWhere('meals.category',`${category}`)
+    .andWhere(function() {
+      this.where('meals.title', 'like', `%${search}%`)
+        .orWhere('ingredients.name', 'like', `%${search}%`);
+    });
+
+    }
+
+
+    else {
+
     meals = await knex('meals')
       .where('user_id', Number(user_id))
-      .whereLike('title', `%${title}%`)
+      .whereLike('category', `%${category}%`)
       .orderBy('title')
-    
-  }
-  const userIngredients = await knex('ingredients').where({ user_id })
 
-  const mealsWithIngredients = meals.map(meal => {
-    const mealIngredient = userIngredients.filter(ingredient => ingredient.meal_id === meal.id)
-    return {
-      ...meal,
-      ingredients: mealIngredient
-    }
-  })
-  return res.json(mealsWithIngredients)
-}
+  } 
+
+    const userIngredients = await knex('ingredients').where({ user_id })
+    
+    const mealsWithIngredients = meals.map(meal => {
+      const mealIngredient = userIngredients.filter(ingredient => ingredient.meal_id === meal.id)
+      return {
+        ...meal,
+        ingredients: mealIngredient
+      }
+    })
+    console.log(mealsWithIngredients)
+    return res.json(mealsWithIngredients)
+  
+
+  }
 
 
   async create(req,res) {
