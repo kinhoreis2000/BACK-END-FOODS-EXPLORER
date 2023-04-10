@@ -11,6 +11,7 @@ routes.get('/', (req, res) => {
   res.send('API RUNNING!');
 });
 routes.use('/users', usersRouter)
+routes.use('/files', usersRouter)
 routes.use('/meals', mealsRouter)
 routes.use('/ingredients', ingredientsRouter)
 routes.use('/sessions', sessionsRouter)

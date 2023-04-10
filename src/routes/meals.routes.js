@@ -13,7 +13,7 @@ const mealsImageController = new MealsImageController()
 
 mealsRoutes.use(ensureAuth)
 
-mealsRoutes.post('/', mealsController.create)
+mealsRoutes.post('/', upload.single('image'),mealsController.create)
 mealsRoutes.put('/:id', mealsController.update)
 mealsRoutes.get('/:id', mealsController.show)
 mealsRoutes.get('/', mealsController.index)

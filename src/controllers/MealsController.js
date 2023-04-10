@@ -53,40 +53,42 @@ class MealsController {
 
 
   async create(req,res) {
-    const {title, image,  description, category, price, ingredients} = req.body
-    console.log(req.file)
+    const response = req.body.meal
+    const meal = JSON.parse(response)
     const mealImageFilename = req.file.filename
-    
-
-    const diskStorage = new DiskStorage()
     const user_id = req.user.id
-    const database = await sqlConnection()
+    const diskStorage = new DiskStorage()
 
-    if(image){
-      await diskStorage.deleteFile(image)
-    }
-    const filename = await diskStorage.saveFile(mealImageFilename)
+    const checkMealExists = await knex('meals').where('title', meal.title)
+    const mealExists = checkMealExists.length > 0
+    
+    console.log(mealExists)
 
-    const checkMealExists = await database.get('SELECT * FROM meals WHERE title = (?)', [title])
-    if(!title || !image ||!description||!category||!price){
+ 
+    const filename = await diskStorage.saveFile(mealImageFilename) 
+
+    if(!meal || !mealImageFilename){
+
       throw new AppError('Todos os campos são obritatórios', 500)
     }
-    if(checkMealExists){
+    if(mealExists){
+
       throw new AppError('Esta refeição já existe')
     }
     
-  
-    
+
     const [meal_id] = await knex('meals').insert({
-      title,
-      image,
+      title: meal.title,
+      image: mealImageFilename,
       user_id, 
-      description, 
-      category,
-      price
+      description: meal.description, 
+      category: meal.category,
+      price: meal.price
     })
+
+
     if(meal_id) {
-      const ingredientsInsert = ingredients.map(ingredient => {
+      const ingredientsInsert = meal.ingredients.map(ingredient => {
         return{
           user_id : Number(user_id),
           meal_id,
