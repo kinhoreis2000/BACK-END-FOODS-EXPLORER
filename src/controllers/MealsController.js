@@ -12,7 +12,6 @@ class MealsController {
 
 
   if (search) {
-    console.log(search)
 
      meals = await knex('meals')
     .select('meals.title', 'meals.image', 'meals.description', 'meals.category', 'meals.price', 'ingredients.name as ingredientes')
@@ -45,7 +44,6 @@ class MealsController {
         ingredients: mealIngredient
       }
     })
-    console.log(mealsWithIngredients)
     return res.json(mealsWithIngredients)
   
 
@@ -62,7 +60,6 @@ class MealsController {
     const checkMealExists = await knex('meals').where('title', meal.title)
     const mealExists = checkMealExists.length > 0
     
-    console.log(mealExists)
 
  
     const filename = await diskStorage.saveFile(mealImageFilename) 
@@ -110,9 +107,9 @@ class MealsController {
     const {title,  description, category, price, ingredients} = req.body
     const {id} = req.params
     const user_id = req.user.id
-  
+    console.log( {title,  description, category, price, ingredients})
     try {
-      await knex('meals')
+      const meal = await knex('meals')
         .where({ id })
         .update({ title, description, category, price });
       
@@ -128,7 +125,7 @@ class MealsController {
           user_id
         });
       }
-  
+      console.log(meal)
       return res.json();
   
     } catch (error) {
@@ -144,11 +141,9 @@ class MealsController {
 
 
   async show(req,res) {
-    
     const {id} = req.params
     const meal = await knex("meals").where({id}).first()
     const ingredients = await knex('ingredients').where({meal_id : Number(meal.id)}).orderBy('name')
-
     return res.json({
       ...meal,
       ingredients: ingredients
