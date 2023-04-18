@@ -135,11 +135,6 @@ class MealsController {
   }
   
 
-
-
-
-
-
   async show(req,res) {
     const {id} = req.params
     const meal = await knex("meals").where({id}).first()
