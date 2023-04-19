@@ -6,7 +6,6 @@ const sqlConnection = require('../database/sqlite')
 
 class MealsUsersController {
   async index(req,res) {
-    console.log('hi')
     
     const { search, category } = req.query
     const Admin_user_id = 1
@@ -55,7 +54,6 @@ class MealsUsersController {
     .orderBy('title')
 
 
-    console.log('meals sem search',meals)
 
 
     const mealsIngredients = await knex('ingredients')

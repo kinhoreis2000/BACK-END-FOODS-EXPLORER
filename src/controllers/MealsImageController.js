@@ -8,7 +8,6 @@ class MealsImageController {
   async create(req,res) {
     const meal_id = req.params.id
     const mealImageFilename = req.file.filename
-    console.log(mealImageFilename)
 
 
     const diskStorage = new DiskStorage()

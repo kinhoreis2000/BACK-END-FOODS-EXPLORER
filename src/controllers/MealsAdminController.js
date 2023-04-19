@@ -107,7 +107,6 @@ class MealsController {
     const {title,  description, category, price, ingredients} = req.body
     const {id} = req.params
     const user_id = req.user.id
-    console.log( {title,  description, category, price, ingredients})
     try {
       const meal = await knex('meals')
         .where({ id })
@@ -125,7 +124,6 @@ class MealsController {
           user_id
         });
       }
-      console.log(meal)
       return res.json();
   
     } catch (error) {
