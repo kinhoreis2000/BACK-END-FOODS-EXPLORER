@@ -1,25 +1,25 @@
 const {Router} = require('express')
-const MealsAdminController = require('../controllers/MealsAdminController')
+const MealsController = require('../controllers/MealsController')
 const MealsImageController = require('../controllers/MealsImageController')
 const ensureAuth = require('../middlewares/ensureAuth.js')
 const multer = require('multer')
 const uploadConfig = require('../configs/upload')
 
-const mealsAdminRoutes = Router()
+const mealsRoutes = Router()
 const upload = multer(uploadConfig.MULTER)
-const mealsAdminController = new MealsAdminController()
+const mealsController = new MealsController()
 const mealsImageController = new MealsImageController()
 
 
-mealsAdminRoutes.use(ensureAuth)
+mealsRoutes.use(ensureAuth)
 
-mealsAdminRoutes.post('/', upload.single('image'),mealsAdminController.create)
-mealsAdminRoutes.put('/:id', mealsAdminController.update)
-mealsAdminRoutes.get('/:id', mealsAdminController.show)
-mealsAdminRoutes.get('/', mealsAdminController.index)
-mealsAdminRoutes.delete('/:id', mealsAdminController.delete)
-mealsAdminRoutes.patch('/image/:id',upload.single('image'), mealsImageController.create )
+mealsRoutes.post('/', upload.single('image'),mealsController.create)
+mealsRoutes.put('/:id', mealsController.update)
+mealsRoutes.get('/:id', mealsController.show)
+mealsRoutes.get('/', mealsController.index)
+mealsRoutes.delete('/:id', mealsController.delete)
+mealsRoutes.patch('/image/:id',upload.single('image'), mealsImageController.create )
 
 
 
-module.exports = mealsAdminRoutes;
+module.exports = mealsRoutes;

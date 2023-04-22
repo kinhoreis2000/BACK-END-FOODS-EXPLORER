@@ -7,23 +7,51 @@ const sqlConnection = require('../database/sqlite')
 class MealsController {
   async index(req,res) {
   const { search, category } = req.query
-  const user_id = req.user.id
+  const user_id = 1
   let meals
 
 
   if (search) {
-
-     meals = await knex('meals')
-    .select('meals.title', 'meals.image', 'meals.description', 'meals.category', 'meals.price', 'ingredients.name as ingredientes')
-    .join('ingredients', 'ingredients.meal_id', '=', 'meals.id')
-    .where('meals.user_id', user_id)
-    .andWhere('meals.category',`${category}`)
-    .andWhere(function() {
-      this.where('meals.title', 'like', `%${search}%`)
-        .orWhere('ingredients.name', 'like', `%${search}%`);
-    });
-
-    }
+    const meals = new Map()
+  
+    await knex.select('meals.*', 'ingredients.name as ingredient_name')
+      .from('meals')
+      .leftJoin('ingredients', 'meals.id', 'ingredients.meal_id')
+      .where(function() {
+        this.where(function() {
+          this.where('meals.title', 'like', `%${search}%`)
+          this.orWhere('ingredients.name', 'like', `%${search}%`)
+        })
+        this.andWhere('meals.category', '=', `${category}`)
+      })
+      .then(rows => {
+        rows.forEach(row => {
+          let meal = meals.get(row.id)
+  
+          if (!meal) {
+            meal = {
+              id: row.id,
+              title: row.title,
+              image: row.image,
+              user_id: row.user_id,
+              description: row.description,
+              category: row.category,
+              price: row.price,
+              created_at: row.created_at,
+              updated_at: row.updated_at,
+              ingredients: new Set()
+            }
+            meals.set(row.id, meal)
+          }
+  
+          if (row.ingredient_name) {
+            meal.ingredients.add(row.ingredient_name)
+          }
+        })
+  
+        return res.json(Array.from(meals.values()))
+      })
+  }
 
 
     else {
@@ -33,18 +61,18 @@ class MealsController {
       .whereLike('category', `%${category}%`)
       .orderBy('title')
 
-  } 
-
-    const userIngredients = await knex('ingredients').where({ user_id })
-    
-    const mealsWithIngredients = meals.map(meal => {
-      const mealIngredient = userIngredients.filter(ingredient => ingredient.meal_id === meal.id)
-      return {
-        ...meal,
-        ingredients: mealIngredient
-      }
-    })
-    return res.json(mealsWithIngredients)
+      
+      const userIngredients = await knex('ingredients').where({ user_id })
+      
+      const mealsWithIngredients = meals.map(meal => {
+        const mealIngredient = userIngredients.filter(ingredient => ingredient.meal_id === meal.id)
+        return {
+          ...meal,
+          ingredients: mealIngredient
+        }
+      })
+      return res.json(mealsWithIngredients)
+    } 
   
 
   }
