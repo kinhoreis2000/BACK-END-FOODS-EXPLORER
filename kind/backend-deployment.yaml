@@ -1,23 +1,23 @@
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: backend
-spec:
-  replicas: 1
-  selector:
-    matchLabels:
-      app: backend
-  template:
-    metadata:
-      labels:
+  apiVersion: apps/v1
+  kind: Deployment
+  metadata:
+    name: backend
+  spec:
+    replicas: 1
+    selector:
+      matchLabels:
         app: backend
-    spec:
-      containers:
-        - name: backend
-          image: my-backend:latest
-          imagePullPolicy: IfNotPresent
-          ports:
-            - containerPort: 5000
-          env:
-            - name: PORT
-              value: "5000"
+    template:
+      metadata:
+        labels:
+          app: backend
+      spec:
+        containers:
+          - name: backend
+            image: backend-foodexplorer-image:latest
+            imagePullPolicy: IfNotPresent
+            ports:
+              - containerPort: 5000
+            env:
+              - name: SERVER_PORT
+                value: "5000"
